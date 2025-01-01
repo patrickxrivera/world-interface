@@ -7,7 +7,7 @@ async function testGetHomeTimeline() {
   try {
     const twitterEnv = new Twitter();
 
-    const timeline = await twitterEnv.profile();
+    const timeline = await twitterEnv.post('"posting from the void"');
 
     console.log(timeline);
   } catch (error) {
