@@ -85,8 +85,6 @@ async function correctCommandWithLLM(command, availableCommands, messages) {
             fullResponse += event;
         }
 
-        console.log({ availableCommands: JSON.stringify(availableCommands), userCommand: command, fullResponse });
-
         const parsedResponse = JSON.parse(fullResponse);
 
         return {

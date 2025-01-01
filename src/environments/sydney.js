@@ -136,6 +136,7 @@ class Sydney {
 
             // Use Replicate's streaming API for better responsiveness
             let fullResponse = '';
+            
             for await (const event of this.replicate.stream(
                 "meta/meta-llama-3.1-405b-instruct",
                 { input }

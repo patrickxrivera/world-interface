@@ -16,8 +16,8 @@ class EnvironmentRegistry {
             exo: new Exo(),
             // meme: new MemeMagic(),
             search: new Search(),
-            sydney: new Sydney(),
-            web: new WebBrowser(),
+            // sydney: new Sydney(),
+            // web: new WebBrowser(),
             // crappr: new Crappr(),
             // trippr: new Trippr(),
         };
