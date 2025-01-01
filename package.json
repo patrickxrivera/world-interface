@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "husky install",
     "test:user": "ts-node qa/userMultiTest.ts",
+    "test:agent": "ts-node qa/multiTest.ts",
     "test:twitter": "ts-node scripts/twitter.ts"
   },
   "dependencies": {

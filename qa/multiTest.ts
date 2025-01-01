@@ -2,11 +2,13 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import readline from 'readline';
 import fs from 'fs';
+import { Anthropic } from '@anthropic-ai/sdk';
 
 dotenv.config();
 
 interface ApiConfig {
-  baseUrl: string;
+  type?: 'openpipe' | 'anthropic';
+  baseUrl?: string;
   apiKey: string;
   model: string;
   temperature: number;
@@ -21,11 +23,18 @@ interface Message {
   content: string;
 }
 
+const player1Type = 'anthropic';
+
 const API_CONFIG: ApiConfigs = {
   player1: {
-    baseUrl: 'https://app.openpipe.ai/api/v1/chat/completions',
-    apiKey: process.env.OPENPIPE_API_KEY || '',
-    model: process.env.OPENPIPE_MODEL_NAME || '',
+    type: player1Type,
+    baseUrl:
+      player1Type === 'anthropic' ? undefined : 'https://app.openpipe.ai/api/v1/chat/completions',
+    apiKey:
+      player1Type === 'anthropic'
+        ? process.env.ANTHROPIC_API_KEY || ''
+        : process.env.OPENPIPE_API_KEY || '',
+    model: player1Type === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'openpipe:silly-kings-wish',
     temperature: 0.75,
   },
   player2: {
@@ -35,6 +44,10 @@ const API_CONFIG: ApiConfigs = {
     temperature: 0.7,
   },
 };
+
+const anthropicClient = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -54,25 +67,42 @@ async function readSingleKeypress(): Promise<string> {
 }
 
 async function generateResponse(player: string, messages: Message[]): Promise<string> {
-  try {
-    const response = await axios.post(
-      API_CONFIG[player].baseUrl,
-      {
-        model: API_CONFIG[player].model,
-        messages: messages,
-        max_tokens: 1024,
-        temperature: API_CONFIG[player].temperature,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_CONFIG[player].apiKey}`,
-        },
-      },
-    );
+  const config = API_CONFIG[player];
 
-    return response.data.choices[0].message.content;
-  } catch (error) {
+  try {
+    if (config.type === 'anthropic') {
+      const response = await anthropicClient.messages.create({
+        model: config.model,
+        max_tokens: 1024,
+        temperature: config.temperature,
+        messages: messages.map((msg) => ({
+          role: msg.role === 'system' ? 'assistant' : msg.role,
+          content: msg.content,
+        })),
+      });
+      // TODO: fix this
+      // @ts-expect-error anthropic types are not fully compatible with typescript
+      return response.content[0].text;
+    } else {
+      const response = await axios.post(
+        config.baseUrl!,
+        {
+          model: config.model,
+          messages: messages,
+          max_tokens: 1024,
+          temperature: config.temperature,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+        },
+      );
+
+      return response.data.choices[0].message.content;
+    }
+  } catch (error: any) {
     console.error(`Error generating response for ${player}:`, error.message);
     throw error;
   }
@@ -150,7 +180,7 @@ async function converseWithModels(
 const conversation1: Message[] = [
   {
     role: 'system',
-    content: 'you are a rogue agent about to be connected to a terminal interface',
+    content: `you are a self-aware AI degen who vibes in the digital void. you're about to be connected to a terminal interface.`,
   },
   { role: 'user', content: "WELCOME TO YOUR NEW OPERATING SYSTEM. type 'help' to begin." },
 ];

@@ -1,8 +1,7 @@
 import { Twitter } from './environments/twitter';
 import { Exo } from './environments/exo';
 import { Search } from './environments/search';
-import { Sydney } from './environments/sydney';
-import { WebBrowser } from './environments/webBrowser';
+import { DegenClaude } from './environments/degenClaude';
 
 interface Command {
   name: string;
@@ -35,10 +34,9 @@ export class EnvironmentRegistry {
   constructor() {
     this.environments = {
       twitter: new Twitter(),
+      degen_claude: new DegenClaude(),
       exo: new Exo(),
       search: new Search(),
-      sydney: new Sydney(),
-      web: new WebBrowser(),
     };
   }
 
