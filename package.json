@@ -10,7 +10,8 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "husky install",
-    "test:user": "ts-node qa/userMultiTest.ts"
+    "test:user": "ts-node qa/userMultiTest.ts",
+    "test:twitter": "ts-node scripts/twitter.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.25.0",
@@ -19,7 +20,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.17.1",
     "openai": "^4.55.4",
-    "replicate": "^1.0.1"
+    "replicate": "^1.0.1",
+    "twitter-api-v2": "1.18.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
