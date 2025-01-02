@@ -150,3 +150,12 @@ pnpm-lock.yaml
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Database files
+data/*.db
+data/*.development.db
+data/*.production.db
+data/*.test.db
+
+# Backup directory
+data/backups/

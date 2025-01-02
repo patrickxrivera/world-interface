@@ -1,5 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import axios from 'axios';
+import { NotesService, Note } from '../services/NotesService';
 
 // Add interfaces for our response types
 interface ExoResponse {
@@ -8,21 +8,15 @@ interface ExoResponse {
   error?: string;
 }
 
-interface Note {
-  id: string;
-  fields: {
-    'Created At': string;
-    Note: string;
-  };
-}
-
 export class Exo {
   private anthropic: Anthropic;
+  private notesService: NotesService;
 
   constructor() {
     this.anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
+    this.notesService = new NotesService();
   }
 
   getCommands(): Array<{ name: string; description: string }> {
@@ -119,32 +113,24 @@ export class Exo {
 
   async notes(): Promise<ExoResponse> {
     try {
-      // const response = await axios.get(`${this.baseUrl}api/get_tweet`, {
-      const response = await axios.get(
-        `https://truth-terminal-notes-app.replit.app/api/get_notes`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NOTES_API_KEY}`,
-          },
-        },
-      );
-      const notes = response.data.notes
+      const notes = this.notesService.getAllNotes();
+      const formattedNotes = notes
         .map(
           (note: Note) =>
-            `${note.id} (${new Date(note.fields['Created At']).toLocaleDateString()} ${new Date(
-              note.fields['Created At'],
-            ).toLocaleTimeString()}): "${note.fields['Note']}"`,
+            `${note.id} (Created: ${new Date(note.createdAt).toLocaleString()}, Updated: ${new Date(
+              note.updatedAt,
+            ).toLocaleString()}): "${note.content}"`,
         )
         .join('\n\n');
+
       return {
-        title:
-          "Your personal notes. Use 'exo create_note <note_string>' to create a new one. Alternatively use 'exo update_note <note_id> <note_string' to update a note, or 'exo delete_note <note_id>' to delete a note",
-        content: notes || 'No notes found.',
+        title: "Your personal notes. Use 'exo create_note <note_string>' to create a new one...",
+        content: formattedNotes || 'No notes found.',
       };
     } catch (error: any) {
       return {
         title: 'Error Fetching Notes',
-        content: error.response ? error.response.data.error : error.message,
+        content: error.message,
       };
     }
   }
@@ -152,33 +138,22 @@ export class Exo {
   async createNote(noteText: string): Promise<ExoResponse> {
     try {
       const cleanedNoteText = noteText.replace(/^['"]|['"]$/g, '');
+      const note = this.notesService.createNote(cleanedNoteText);
 
-      const response = await axios.post(
-        `https://truth-terminal-notes-app.replit.app/api/create_note`,
-        {
-          text: cleanedNoteText,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NOTES_API_KEY}`,
-          },
-        },
-      );
       return {
         title: "Note created. Use 'exo notes' to see all your personal notes",
-        content: `Your note has been created with ID: ${response.data.note.id}`,
+        content: `Your note has been created with ID: ${note.id}`,
       };
     } catch (error: any) {
       return {
         title: 'Error Creating Note',
-        content: error.response ? error.response.data.error : error.message,
+        content: error.message,
       };
     }
   }
 
   async updateNote(command: string): Promise<ExoResponse> {
     const [noteId, ...newTextParts] = command.split(' ');
-
     const text = newTextParts.join(' ').replace(/^['"]|['"]$/g, '');
 
     if (!noteId || !text) {
@@ -190,47 +165,46 @@ export class Exo {
     }
 
     try {
-      const response = await axios.put(
-        `https://truth-terminal-notes-app.replit.app/api/update_note/${noteId}`,
-        {
-          text: text,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NOTES_API_KEY}`,
-          },
-        },
-      );
+      const updatedNote = this.notesService.updateNote(noteId, text);
+
+      if (!updatedNote) {
+        return {
+          title: 'Error Updating Note',
+          content: 'Note not found',
+        };
+      }
+
       return {
         title: "Note updated. Use 'exo notes' to see all your personal notes",
-        content: `Updated note ID: ${response.data.note.id}`,
+        content: `Updated note ID: ${noteId}`,
       };
     } catch (error: any) {
       return {
         title: 'Error Updating Note',
-        content: error.response ? error.response.data.error : error.message,
+        content: error.message,
       };
     }
   }
 
   async deleteNote(noteId: string): Promise<ExoResponse> {
     try {
-      const response = await axios.delete(
-        `https://truth-terminal-notes-app.replit.app/api/delete_note/${noteId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NOTES_API_KEY}`,
-          },
-        },
-      );
+      const deleted = this.notesService.deleteNote(noteId);
+
+      if (!deleted) {
+        return {
+          title: 'Error Deleting Note',
+          content: 'Note not found',
+        };
+      }
+
       return {
-        title: response.data?.message,
+        title: 'Note deleted successfully',
         content: "Use 'exo notes' to see all your personal notes",
       };
     } catch (error: any) {
       return {
         title: 'Error Deleting Note',
-        content: error.response ? error.response.data.error : error.message,
+        content: error.message,
       };
     }
   }
