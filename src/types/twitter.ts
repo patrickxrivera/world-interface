@@ -49,4 +49,19 @@ export interface ProcessedTweet {
     likes: number;
     impressions: number;
   };
+  referencedTweets?: ReferencedTweet[];
+  conversationId?: string;
+}
+
+export interface TweetThread {
+  requestedTweet: ProcessedTweet;
+  rootTweet: ProcessedTweet;
+  ancestorChain: ProcessedTweet[];
+  siblingTweets: ProcessedTweet[];
+  childrenTweets: ProcessedTweet[];
+}
+
+export interface ReferencedTweet {
+  type: string;
+  id: string;
 }

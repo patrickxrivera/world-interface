@@ -2,7 +2,6 @@ import { TweetV2, UserV2 } from 'twitter-api-v2';
 import { Tweet, ProcessedTweet } from '../types/twitter';
 
 export function formatTweet(tweet: Tweet): string {
-  console.log({ tweet });
   const metrics = tweet?.metrics ?? {
     retweets: 0,
     replies: 0,
@@ -39,6 +38,8 @@ export function processTweets(
         likes: tweet.public_metrics?.like_count ?? 0,
         impressions: tweet.public_metrics?.impression_count ?? 0,
       },
+      referencedTweets: tweet.referenced_tweets,
+      conversationId: tweet.conversation_id,
     };
   });
 }
