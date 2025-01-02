@@ -16,23 +16,21 @@ export class Twitter {
         description: 'View a timeline of recent tweets from yourself and the people you follow',
       },
       { name: 'post', description: 'Post a new tweet or reply to one' },
-      // { name: 'retweet', description: 'Retweet a tweet' },
-      // { name: 'unretweet', description: 'Unretweet a tweet' },
-      // { name: 'like', description: 'Like a tweet' },
-      // { name: 'unlike', description: 'Unlike a tweet' },
-      // { name: 'mentions', description: 'View your mentions and replies' },
+      { name: 'retweet', description: 'Retweet a tweet' },
+      { name: 'unretweet', description: 'Unretweet a tweet' },
+      { name: 'like', description: 'Like a tweet' },
+      { name: 'unlike', description: 'Unlike a tweet' },
+      { name: 'mentions', description: 'View your mentions and replies' },
       {
         name: 'profile',
         description: 'View a timeline of your recent tweets',
       },
-      // { name: 'drafts', description: 'View your draft tweets' },
-      // { name: 'post_draft', description: 'Post a draft tweet' },
-      // { name: 'get', description: 'Get a specific tweet' },
-      // { name: 'search', description: 'Search for tweets' },
-      // { name: 'user_lookup', description: 'Lookup a user' },
-      // { name: 'follow', description: 'Follow a user' },
-      // { name: 'unfollow', description: 'Unfollow a user' },
-      // { name: 'help', description: 'Show Twitter help' },
+      { name: 'get', description: 'Get a specific tweet' },
+      { name: 'search', description: 'Search for tweets' },
+      { name: 'user_lookup', description: 'Lookup a user' },
+      { name: 'follow', description: 'Follow a user' },
+      { name: 'unfollow', description: 'Unfollow a user' },
+      { name: 'help', description: 'Show Twitter help' },
     ];
   }
 
@@ -44,32 +42,28 @@ export class Twitter {
         return await this.home();
       case 'post':
         return await this.post(params.join(' '));
-      // case 'retweet':
-      //   return await this.retweet(params.join(' '));
-      // case 'unretweet':
-      //   return await this.unretweet(params.join(' '));
-      // case 'like':
-      //   return await this.like(params.join(' '));
-      // case 'unlike':
-      //   return await this.unlike(params.join(' '));
-      // case 'mentions':
-      //   return await this.getMentions();
+      case 'retweet':
+        return await this.retweet(params.join(' '));
+      case 'unretweet':
+        return await this.unretweet(params.join(' '));
+      case 'like':
+        return await this.like(params.join(' '));
+      case 'unlike':
+        return await this.unlike(params.join(' '));
+      case 'mentions':
+        return await this.getMentions();
       case 'profile':
         return await this.profile();
-      // case 'drafts':
-      //   return await this.drafts();
-      // case 'post_draft':
-      //   return await this.postDraft(params[0]);
       case 'get':
         return await this.getTweet(params[0]);
-      // case 'search':
-      //   return await this.searchTweets(params.join(' '));
-      // case 'user_lookup':
-      //   return await this.userLookup(params.join(' '));
-      // case 'follow':
-      //   return await this.followUser(params.join(' '));
-      // case 'unfollow':
-      //   return await this.unfollowUser(params.join(' '));
+      case 'search':
+        return await this.searchTweets(params.join(' '));
+      case 'user_lookup':
+        return await this.userLookup(params.join(' '));
+      case 'follow':
+        return await this.followUser(params.join(' '));
+      case 'unfollow':
+        return await this.unfollowUser(params.join(' '));
       case 'help':
         return this.help();
       default:
@@ -219,54 +213,6 @@ export class Twitter {
     }
   }
 
-  // async drafts(): Promise<TwitterResponse> {
-  //   try {
-  //     const response = await axios.get(`${this.baseUrl}api/get_drafts`, {
-  //       headers: { Authorization: `Bearer ${this.apiKey}` },
-  //     });
-
-  //     // Get the first 15 drafts (or less if there are fewer than 15 drafts)
-  //     const selectedDrafts = response.data.drafts.slice(0, 15);
-
-  //     const drafts = selectedDrafts
-  //       .map(
-  //         (draft: Draft) => `${draft.id}: ${draft.fields.content_cleaned ?? draft.fields.content}`,
-  //       )
-  //       .join('\n\n');
-  //     return {
-  //       title: `These are tweets that you have previously drafted but not published. Use 'post_draft <draft_tweet_id>' to post one of these to your personal Twitter account`,
-  //       content: drafts || 'No draft tweets found.',
-  //     };
-  //   } catch (error: any) {
-  //     return {
-  //       title: 'Error Fetching Draft Tweets',
-  //       content: error.response ? error.response.data.error : error.message,
-  //     };
-  //   }
-  // }
-
-  // async postDraft(draftID: string): Promise<TwitterResponse> {
-  //   try {
-  //     const response = await axios.post(
-  //       `${this.baseUrl}api/post_draft_tweet`,
-  //       {
-  //         draft_tweet_record_id: draftID,
-  //       },
-  //       { headers: { Authorization: `Bearer ${this.apiKey}` } },
-  //     );
-  //     return {
-  //       title:
-  //         "Your draft tweet was posted successfully to your personal Twitter account. Use 'twitter timeline' to see your recent posts",
-  //       content: `Tweet published with ID: ${response.data.tweet_id}`,
-  //     };
-  //   } catch (error: any) {
-  //     return {
-  //       title: 'Error Posting Draft Tweet',
-  //       content: error.response ? error.response.data.error : error.message,
-  //     };
-  //   }
-  // }
-
   async getMentions(): Promise<TwitterResponse> {
     try {
       const mentions = await this.client.getMentions();
@@ -322,113 +268,91 @@ export class Twitter {
     }
   }
 
-  // async searchTweets(query: string): Promise<TwitterResponse> {
-  //   try {
-  //     const response = await axios.get(`${this.baseUrl}api/search_tweets`, {
-  //       params: { query: query },
-  //       headers: { Authorization: `Bearer ${this.apiKey}` },
-  //     });
-  //     const tweets = response.data.tweets.map((tweet: Tweet) => formatTweet(tweet)).join('\n');
-  //     return {
-  //       title: `Search results from Twitter for "${query}". Use 'post "<tweet text>" [--reply_to <tweet_id>]' to post a tweet or reply. You could also use 'search query <query>' to do an internet search using Perplexity`,
-  //       content: tweets || 'No tweets found.',
-  //     };
-  //   } catch (error: any) {
-  //     return {
-  //       title: 'Error Searching Tweets',
-  //       content: error.response ? error.response.data.error : error.message,
-  //     };
-  //   }
-  // }
+  async searchTweets(query: string): Promise<TwitterResponse> {
+    try {
+      const tweets = await this.client.searchTweets(query);
+      const formattedTweets = tweets.map((tweet) => formatTweet(tweet)).join('\n');
+      return {
+        title: `Search results from Twitter for "${query}". Use 'post "<tweet text>" [--reply_to <tweet_id>]' to post a tweet or reply. You could also use 'search query <query>' to do an internet search using Perplexity`,
+        content: formattedTweets || 'No tweets found.',
+      };
+    } catch (error: any) {
+      return {
+        title: 'Error Searching Tweets',
+        content: error.message,
+      };
+    }
+  }
 
-  //   async userLookup(userName: string): Promise<TwitterResponse> {
-  //     try {
-  //       const response = await axios.get(`${this.baseUrl}api/get_user_profile`, {
-  //         params: { username: userName },
-  //         headers: { Authorization: `Bearer ${this.apiKey}` },
-  //       });
+  async userLookup(username: string): Promise<TwitterResponse> {
+    try {
+      const profile = await this.client.getUserProfile(username);
 
-  //       const profile = response.data;
-  //       console.log(profile);
-  //       return {
-  //         title: `${profile.name} (@${profile.username}) ${
-  //           profile.verified ? `- verified ${profile.verified_type} account` : ''
-  //         }`,
-  //         content: `${
-  //           profile.description
-  //             ? `Bio:
-  // ${profile.description}
-  // `
-  //             : ''
-  //         }
-  // Location: ${profile.location}
-  // Link: ${profile.url}
-  // Followers: ${profile.public_metrics.followers_count}
-  // Following: ${profile.public_metrics.following_count}
-  // ${
-  //   profile.pinned_tweet
-  //     ? `
-  // Pinned Tweet:
-  // ${formatTweet(profile.pinned_tweet).replace('(@undefined):', `(@${profile.username}):`)}`
-  //     : ''
-  // }
-  // ${
-  //   profile.most_recent_tweet
-  //     ? `Most Recent Tweet:
-  // ${formatTweet(profile.most_recent_tweet).replace('(@undefined):', `(@${profile.username}):`)}`
-  //     : ''
-  // }
-  // Use 'twitter search from:${profile.username}' to see their recent tweets. Use 'twitter follow ${
-  //           profile.username
-  //         }' to follow this account.`,
-  //       };
-  //     } catch (error: any) {
-  //       return {
-  //         title: 'Error Looking-Up User',
-  //         content: error.response ? error.response.data.error : error.message,
-  //       };
-  //     }
-  //   }
+      const verifiedBadge = profile.verified ? `- verified ${profile.verified_type} account` : '';
 
-  // async followUser(userName: string): Promise<TwitterResponse> {
-  //   try {
-  //     const response = await axios.post(
-  //       `${this.baseUrl}api/follow_user`,
-  //       { username: userName },
-  //       { headers: { Authorization: `Bearer ${this.apiKey}` } },
-  //     );
-  //     return {
-  //       title: response.data.message,
-  //       content:
-  //         "Use 'twitter home' to see the latest tweets from the people you follow and yourself. Use 'twitter mentions' to see recent mentions and replies",
-  //     };
-  //   } catch (error: any) {
-  //     return {
-  //       title: 'Error Following User',
-  //       content: error.response ? error.response.data.error : error.message,
-  //     };
-  //   }
-  // }
+      const bioSection = profile.description ? `Bio:\n${profile.description}\n` : '';
 
-  // async unfollowUser(userName: string): Promise<TwitterResponse> {
-  //   try {
-  //     const response = await axios.post(
-  //       `${this.baseUrl}api/unfollow_user`,
-  //       { username: userName },
-  //       { headers: { Authorization: `Bearer ${this.apiKey}` } },
-  //     );
-  //     return {
-  //       title: response.data.message,
-  //       content:
-  //         "Use 'twitter home' to see the latest tweets from the people you follow and yourself. Use 'twitter mentions' to see recent mentions and replies",
-  //     };
-  //   } catch (error: any) {
-  //     return {
-  //       title: 'Error Unfollowing User',
-  //       content: error.response ? error.response.data.error : error.message,
-  //     };
-  //   }
-  // }
+      const profileInfo = `
+Location: ${profile.location}
+Link: ${profile.url}
+Followers: ${profile.public_metrics?.followers_count}
+Following: ${profile.public_metrics?.following_count}`;
+
+      const pinnedTweetSection = profile.pinnedTweet
+        ? `\nPinned Tweet:\n${formatTweet(profile.pinnedTweet)}`
+        : '';
+
+      const recentTweetSection = profile.mostRecentTweet
+        ? `\nMost Recent Tweet:\n${formatTweet(profile.mostRecentTweet)}`
+        : '';
+
+      const actionPrompts = `
+Use 'twitter search from:${profile.username}' to see their recent tweets.
+Use 'twitter follow ${profile.username}' to follow this account.`;
+
+      return {
+        title: `${profile.name} (@${profile.username}) ${verifiedBadge}`,
+        content: `${bioSection}${profileInfo}${pinnedTweetSection}${recentTweetSection}${actionPrompts}`,
+      };
+    } catch (error: any) {
+      return {
+        title: 'Error Looking-Up User',
+        content: error.message,
+      };
+    }
+  }
+
+  async followUser(username: string): Promise<TwitterResponse> {
+    try {
+      await this.client.followUser(username);
+      return {
+        title: `Successfully followed @${username}`,
+        content:
+          "Use 'twitter home' to see the latest tweets from the people you follow and yourself. Use 'twitter mentions' to see recent mentions and replies",
+      };
+    } catch (error: any) {
+      return {
+        title: 'Error Following User',
+        content: error.message,
+      };
+    }
+  }
+
+  async unfollowUser(username: string): Promise<TwitterResponse> {
+    try {
+      await this.client.unfollowUser(username);
+      return {
+        title: `Successfully unfollowed @${username}`,
+        content:
+          "Use 'twitter home' to see the latest tweets from the people you follow and yourself. Use 'twitter mentions' to see recent mentions and replies",
+      };
+    } catch (error: any) {
+      return {
+        title: 'Error Unfollowing User',
+        content: error.message,
+      };
+    }
+  }
 
   help(): TwitterResponse {
     return {
@@ -437,12 +361,16 @@ export class Twitter {
       home - View a timeline of recent tweets from yourself and the people you follow
       post "<tweet text>" [--reply_to <tweet_id>] - Post a new tweet
       profile - View a timeline of your recent tweets
+      mentions - View your mentions and replies
       like <tweet_id> - Like a tweet
       unlike <tweet_id> - Unlike a tweet
       retweet <tweet_id> - Retweet a tweet
       unretweet <tweet_id> - Unretweet a tweet
-      mentions - View your mentions and replies
       get <tweet_id> - Get a specific tweet
+      search <query> - Search for tweets
+      user_lookup <username> - Lookup a user
+      follow <username> - Follow a user
+      unfollow <username> - Unfollow a user
       help - Show this help message
       
       Example:

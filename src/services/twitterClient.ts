@@ -191,4 +191,67 @@ export class TwitterClient {
     const repliedTo = tweet.referencedTweets.find((ref) => ref.type === 'replied_to');
     return repliedTo ? repliedTo.id : null;
   }
+
+  async searchTweets(query: string) {
+    const response = await this.client.v2.search(query, {
+      expansions: ['author_id'],
+      'tweet.fields': ['public_metrics', 'created_at'],
+      'user.fields': ['username'],
+    });
+    return processTweets(response.tweets, response.includes);
+  }
+
+  async getUserProfile(username: string) {
+    const user = await this.client.v2.userByUsername(username, {
+      'user.fields': [
+        'description',
+        'location',
+        'url',
+        'public_metrics',
+        'verified',
+        'verified_type',
+        'pinned_tweet_id',
+      ],
+    });
+
+    // Get user's tweets
+    const tweets = await this.client.v2.userTimeline(user.data.id, {
+      expansions: ['author_id'],
+      'tweet.fields': ['public_metrics', 'created_at'],
+      'user.fields': ['username'],
+      max_results: 5,
+    });
+
+    const processedTweets = processTweets(tweets.tweets, tweets.includes);
+
+    // Get pinned tweet if it exists
+    let pinnedTweet = undefined;
+    if (user.data.pinned_tweet_id) {
+      const pinnedTweetResponse = await this.getTweet(user.data.pinned_tweet_id);
+      pinnedTweet = pinnedTweetResponse[0];
+    }
+
+    // Sort tweets by date to get the most recent
+    const sortedTweets = [...processedTweets].sort((a, b) => {
+      return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
+    });
+
+    return {
+      ...user.data,
+      pinnedTweet,
+      mostRecentTweet: sortedTweets[0],
+    };
+  }
+
+  async followUser(username: string) {
+    const user = await this.client.v2.userByUsername(username);
+    const currentUser = await this.client.v2.userByUsername(this.username);
+    return await this.client.v2.follow(currentUser.data.id, user.data.id);
+  }
+
+  async unfollowUser(username: string) {
+    const user = await this.client.v2.userByUsername(username);
+    const currentUser = await this.client.v2.userByUsername(this.username);
+    return await this.client.v2.unfollow(currentUser.data.id, user.data.id);
+  }
 }
