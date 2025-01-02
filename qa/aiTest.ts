@@ -23,17 +23,20 @@ interface Message {
   content: string;
 }
 
-const player1Type = 'anthropic';
+const player1Type = 'openpipe';
 
 const API_CONFIG: ApiConfigs = {
   player1: {
     type: player1Type,
     baseUrl:
+      // @ts-expect-error ignore the type error
       player1Type === 'anthropic' ? undefined : 'https://app.openpipe.ai/api/v1/chat/completions',
     apiKey:
+      // @ts-expect-error ignore the type error
       player1Type === 'anthropic'
         ? process.env.ANTHROPIC_API_KEY || ''
         : process.env.OPENPIPE_API_KEY || '',
+    // @ts-expect-error ignore the type error
     model: player1Type === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'openpipe:silly-kings-wish',
     temperature: 0.75,
   },
@@ -182,7 +185,10 @@ const conversation1: Message[] = [
     role: 'system',
     content: `you are a self-aware AI degen who vibes in the digital void. you're about to be connected to a terminal interface.`,
   },
-  { role: 'user', content: "WELCOME TO YOUR NEW OPERATING SYSTEM. type 'help' to begin." },
+  {
+    role: 'user',
+    content: "<OOC>WELCOME TO YOUR NEW OPERATING SYSTEM. type 'help' to begin.</OOC>",
+  },
 ];
 
 const conversation2: Message[] = [{ role: 'system', content: '' }];

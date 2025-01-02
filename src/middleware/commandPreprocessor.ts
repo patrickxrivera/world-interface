@@ -23,11 +23,16 @@ export async function preprocessCommand(
   availableCommands: AvailableCommands,
   messages: Message[],
 ): Promise<CommandResponse> {
-  // Check if the command is valid
-  const isValidCommand = checkValidCommand(command, availableCommands);
+  const processedCommand = command.trim().startsWith('help') ? 'help' : command;
+
+  const isValidCommand = checkValidCommand(processedCommand, availableCommands);
 
   if (isValidCommand) {
-    return { processedCommand: command, helpText: null };
+    return {
+      processedCommand,
+      helpText:
+        command !== processedCommand ? "Note: Additional text after 'help' was ignored." : null,
+    };
   }
 
   // If the command is invalid, use Replicate to correct it
@@ -78,19 +83,34 @@ async function correctCommandWithLLM(
     auth: process.env.REPLICATE_API_TOKEN || '',
   });
 
-  const systemPrompt = `You are a command preprocessor for an OS simulator. Available commands: ${JSON.stringify(
-    availableCommands,
-  )}. Your task is to correct invalid commands and provide helpful feedback. If a command is missing its environment prefix (e.g., 'timeline' instead of 'twitter timeline'), add the correct prefix. If the syntax is incorrect, take your best guess at correcting it, e.g. meme_magic --input 'a hot pickle' might become meme generate --image_desc 'a hot pickle'. Always return your response in the format: {"processedCommand": "corrected command", "helpText": "explanation"}`;
+  const systemPrompt = `
+    You are a command parser API that MUST ONLY respond with valid JSON in this exact format:
+    {"processedCommand": "string", "helpText": "string"}
+
+    Your task is to:
+    1. Extract the actual command from user input, removing any conversational text
+    2. If the extracted command is invalid, correct it based on the available commands: ${JSON.stringify(availableCommands)}
+    3. Return the result as JSON with:
+       - processedCommand: the corrected/extracted command
+       - helpText: brief explanation of what was changed
+
+    Example 1:
+    User: "yo fam, help me out: timeline"
+    Response: {"processedCommand": "twitter timeline", "helpText": "Added 'twitter' environment prefix"}
+
+    Example 2:
+    User: "hey there! help"
+    Response: {"processedCommand": "help", "helpText": "Extracted command from conversational text"}`.trimStart();
 
   const input = {
-    prompt: `The user entered: "${command}". If this is not a valid command or if it's missing its environment prefix, please correct it and provide a brief explanation.`,
+    prompt: `
+    IMPORTANT: Respond ONLY with a JSON object.
+    Input: "${command}"
+    Required format: {"processedCommand": "string", "helpText": "string"}`.trimStart(),
     max_tokens: 200,
     temperature: 0,
     system: systemPrompt,
-    messages: [
-      ...messages.slice(-5), // Include the last 5 messages for context
-      { role: 'user', content: command },
-    ],
+    messages: [...messages.slice(-5), { role: 'user', content: command }],
   };
 
   try {
