@@ -1,4 +1,4 @@
-import { TwitterClient } from '../services/twitterClient';
+import { TwitterClient } from '../services/TwitterClient';
 import { Command, PostCommandParams, TwitterResponse } from '../types/twitter';
 import { formatTweet } from '../utils/twitter';
 
