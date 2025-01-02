@@ -74,9 +74,12 @@ export class TwitterClient {
   }
 
   async getTweet(tweetId: string) {
-    return await this.client.v2.singleTweet(tweetId, {
+    const tweet = await this.client.v2.singleTweet(tweetId, {
       expansions: ['author_id', 'referenced_tweets.id'],
       'tweet.fields': ['public_metrics', 'created_at', 'conversation_id'],
+      'user.fields': ['username'],
     });
+
+    return processTweets([tweet.data], tweet.includes);
   }
 }

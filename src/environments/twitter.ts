@@ -286,9 +286,9 @@ export class Twitter {
 
   async getTweet(tweetId: string): Promise<TwitterResponse> {
     try {
-      const tweet = await this.client.getTweet(tweetId);
+      const [tweet] = await this.client.getTweet(tweetId);
 
-      const formattedTweet = formatTweet(tweet.data);
+      const formattedTweet = formatTweet(tweet);
 
       return {
         title: `Tweet ${tweetId} and its context. Use 'twitter post' with the --reply_to parameter to reply to it.`,
