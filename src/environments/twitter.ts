@@ -286,13 +286,33 @@ export class Twitter {
 
   async getTweet(tweetId: string): Promise<TwitterResponse> {
     try {
-      const [tweet] = await this.client.getTweet(tweetId);
+      const thread = await this.client.getTweetWithThread(tweetId);
 
-      const formattedTweet = formatTweet(tweet);
+      if (!thread) {
+        throw new Error('Tweet not found');
+      }
+
+      const { ancestorChain, requestedTweet, siblingTweets, childrenTweets } = thread;
+
+      let content = '';
+
+      if (ancestorChain?.length > 0) {
+        content += ancestorChain.map((tweet) => formatTweet(tweet)).join('\n');
+      }
+
+      content += `\n***\n${formatTweet(requestedTweet)}***\n\n`;
+
+      if (siblingTweets?.length > 0 && !childrenTweets?.length) {
+        content += siblingTweets.map((tweet) => formatTweet(tweet)).join('\n');
+      }
+
+      if (childrenTweets?.length > 0) {
+        content += childrenTweets.map((tweet) => formatTweet(tweet)).join('\n');
+      }
 
       return {
         title: `Tweet ${tweetId} and its context. Use 'twitter post' with the --reply_to parameter to reply to it.`,
-        content: formattedTweet,
+        content: content.trim(),
       };
     } catch (error: any) {
       return {
