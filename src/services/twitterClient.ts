@@ -86,7 +86,13 @@ export class TwitterClient {
   async getTweetWithThread(tweetId: string): Promise<TweetThread | null> {
     const initialTweet = await this.client.v2.singleTweet(tweetId, {
       expansions: ['author_id', 'referenced_tweets.id'],
-      'tweet.fields': ['public_metrics', 'created_at', 'conversation_id', 'referenced_tweets'],
+      'tweet.fields': [
+        'public_metrics',
+        'created_at',
+        'conversation_id',
+        'referenced_tweets',
+        'note_tweet',
+      ],
       'user.fields': ['username'],
     });
 
@@ -195,7 +201,7 @@ export class TwitterClient {
   async searchTweets(query: string) {
     const response = await this.client.v2.search(query, {
       expansions: ['author_id'],
-      'tweet.fields': ['public_metrics', 'created_at'],
+      'tweet.fields': ['public_metrics', 'created_at', 'text', 'referenced_tweets'],
       'user.fields': ['username'],
     });
     return processTweets(response.tweets, response.includes);
@@ -217,7 +223,7 @@ export class TwitterClient {
     // Get user's tweets
     const tweets = await this.client.v2.userTimeline(user.data.id, {
       expansions: ['author_id'],
-      'tweet.fields': ['public_metrics', 'created_at'],
+      'tweet.fields': ['public_metrics', 'created_at', 'text', 'referenced_tweets'],
       'user.fields': ['username'],
       max_results: 5,
     });

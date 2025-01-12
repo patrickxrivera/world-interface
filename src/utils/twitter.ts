@@ -11,6 +11,21 @@ export function formatTweet(tweet: Tweet): string {
 
   const tweetText = tweet.noteTweet?.text || tweet.text;
 
+  const retweet = tweet.referencedTweets?.find((rt) => rt.type === 'retweeted');
+
+  if (retweet) {
+    if (!tweetText)
+      return `${tweet.id} (@${tweet?.author?.username}): RT ${retweet.id} // No text available\n`;
+
+    return `${tweet.id} (@${tweet?.author?.username}): RT ${retweet.id} (@${tweetText.split('@')[1].split(':')[0]}): ${tweetText.substring(3)} // Replies: ${metrics.replies}, Likes: ${metrics.likes}, Retweets: ${metrics.retweets}, Views: ${metrics.impressions}\n`;
+  }
+
+  const quoteTweet = tweet.referencedTweets?.find((qt) => qt.type === 'quoted');
+
+  if (quoteTweet) {
+    return `${tweet.id} (@${tweet?.author?.username}): ${tweetText} [QT: ${quoteTweet.id}] // Replies: ${metrics.replies}, Likes: ${metrics.likes}, Retweets: ${metrics.retweets}, Views: ${metrics.impressions}\n`;
+  }
+
   return `${tweet.id} (@${tweet?.author?.username}): ${tweetText} // Replies: ${metrics.replies}, Likes: ${metrics.likes}, Retweets: ${metrics.retweets}, Views: ${metrics.impressions}\n`;
 }
 
@@ -20,7 +35,7 @@ export function processTweets(
 ): ProcessedTweet[] {
   return tweets.map((tweet) => {
     const author = includes?.users?.find((user) => user.id === tweet.author_id);
-
+    console.log(tweet);
     return {
       id: tweet.id,
       text: tweet.text,

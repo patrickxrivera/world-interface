@@ -9,6 +9,10 @@ export interface Tweet {
     likes: number;
     impressions: number;
   };
+  referencedTweets?: {
+    type: string;
+    id: string;
+  }[];
 }
 
 export interface Command {
